@@ -1,3 +1,9 @@
+from threading import *
+import time
+
+# creating thread instance where count = 3
+obj = Semaphore(3)
+
 class BankAccount():
 
     def __init__(self, initial_money=0, owner='Anonymous'):
@@ -13,6 +19,7 @@ class BankAccount():
 
         for ind in range(0, amount):
             self.money += 1
+            time.sleep(1)
 
         self.history_file.write('Account money after %s deposit: %s\n' % (by, self.money))
 
@@ -22,6 +29,7 @@ class BankAccount():
 
         for ind in range(0, amount):
             self.money -= 1
+            time.sleep(1)
 
         self.history_file.write('Account money after %s deposit: %s\n' % (by, self.money))
 
@@ -47,12 +55,17 @@ class BankAccount():
         self.history_file.write(
             'Customer %s is adding %s to bank account of %s containing %s\n' % (by, amount, self.owner, self.money))
         self.money -= amount
-        self.history_file.write('Account money after %s deposit: %s\n' % (by, self.money))
+        self.history_file.write('Account money after %s withdrawal: %s\n' % (by, self.money))
     def __del__(self):
         self.history_file.close()
 
 my_account = BankAccount(1000, "WorldCompanyBigBoss")
-my_account.execute_deposit(100, "First customer: Thread-1")
-my_account.execute_deposit(7500, "Second customer: Thread-2")
-my_account.execute_withdrawal(200, "Second customer: Thread-3")
-my_account.execute_withdrawal(50, "First customer: Thread-4")
+t1 = Thread(target = my_account.execute_deposit, args =(100, "First customer: Thread-1"))
+t2 = Thread(target = my_account.execute_deposit, args = (7500, "Second customer: Thread-2"))
+t3 = Thread(target = my_account.execute_withdrawal, args = (200, "Second customer: Thread-3"))
+t4 = Thread(target = my_account.execute_withdrawal, args = (50, "First customer: Thread-4"))
+
+t1.start()
+t2.start()
+t3.start()
+t4.start()
